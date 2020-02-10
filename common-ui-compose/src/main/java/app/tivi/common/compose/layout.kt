@@ -16,11 +16,11 @@
 
 package app.tivi.common.compose
 
+import androidx.animation.AnimatedFloat
 import androidx.compose.Composable
 import androidx.ui.core.Layout
 import androidx.ui.core.LayoutCoordinates
 import androidx.ui.core.RepaintBoundary
-import androidx.ui.foundation.ValueHolder
 import androidx.ui.unit.IntPx
 import androidx.ui.unit.PxPosition
 import androidx.ui.unit.min
@@ -31,11 +31,13 @@ import androidx.ui.unit.px
  */
 @Composable
 fun WithOffset(
-    xOffset: ValueHolder<Float>? = null,
-    yOffset: ValueHolder<Float>? = null,
+    xOffset: AnimatedFloat? = null,
+    yOffset: AnimatedFloat? = null,
     child: @Composable() () -> Unit
 ) {
-    Layout(children = { RepaintBoundary(children = child) }) { measurables, constraints ->
+    Layout(children = {
+        RepaintBoundary(children = child)
+    }) { measurables, constraints ->
         if (measurables.size > 1) {
             throw IllegalStateException("Only one child is allowed")
         }

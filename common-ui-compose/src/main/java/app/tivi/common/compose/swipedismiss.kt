@@ -18,10 +18,10 @@ package app.tivi.common.compose
 
 import androidx.compose.Composable
 import androidx.compose.state
+import androidx.ui.animation.animatedFloat
+import androidx.ui.core.DensityAmbient
 import androidx.ui.core.OnChildPositioned
 import androidx.ui.core.OnPositioned
-import androidx.ui.core.WithDensity
-import androidx.ui.foundation.animation.animatedDragValue
 import androidx.ui.foundation.gestures.DragDirection
 import androidx.ui.foundation.gestures.Draggable
 import androidx.ui.layout.Container
@@ -45,43 +45,39 @@ fun SwipeToDismiss(
     backgroundChildren: @Composable() (swipeProgress: Float, wouldCompleteOnRelease: Boolean) -> Unit,
     swipeChildren: @Composable() (swipeProgress: Float, wouldCompleteOnRelease: Boolean) -> Unit
 ) = Stack {
-    val min = state { 0f }
-    val max = state { 0f }
+    val position = animatedFloat(0f)
 
     OnPositioned(onPositioned = { coordinates ->
+        var min = position.min
+        var max = position.max
+
         if (SwipeDirection.LEFT in swipeDirections) {
-            min.value = -coordinates.size.width.value.toFloat()
+            min = -coordinates.size.width.value.toFloat()
         }
         if (SwipeDirection.RIGHT in swipeDirections) {
-            max.value = coordinates.size.width.value.toFloat()
+            max = coordinates.size.width.value.toFloat()
         }
+        position.setBounds(min, max)
     })
 
-    val position = animatedDragValue(0f, min.value, max.value)
-    val swipeChildrenSize = state { IntPxSize(IntPx.Zero, IntPx.Zero) }
+    var swipeChildrenSize by state { IntPxSize(IntPx.Zero, IntPx.Zero) }
     val progress = state { 0f }
 
     if (position.value != 0f) {
-        // Container only accepts Dp values for it's size, whereas we have Px values. So we
-        // need to use WithDensity to convert them back.
-        // TODO: raise FR so that Container can accept Px/PxSize values
-        WithDensity {
+        with(DensityAmbient.current) {
             Container(
-                width = swipeChildrenSize.value.width.toDp(),
-                height = swipeChildrenSize.value.height.toDp(),
-                children = {
-                    backgroundChildren(
-                        progress.value,
-                        progress.value.absoluteValue >= swipeCompletePercentage
-                    )
-                }
-            )
+                width = swipeChildrenSize.width.toDp(),
+                height = swipeChildrenSize.height.toDp()
+            ) {
+                backgroundChildren(
+                    progress.value,
+                    progress.value.absoluteValue >= swipeCompletePercentage
+                )
+            }
         }
     }
 
-    OnChildPositioned(onPositioned = { coords ->
-        swipeChildrenSize.value = coords.size
-    }) {
+    OnChildPositioned(onPositioned = { coords -> swipeChildrenSize = coords.size }) {
         Draggable(
             dragDirection = DragDirection.Horizontal,
             dragValue = position,
@@ -89,20 +85,20 @@ fun SwipeToDismiss(
                 // We can't reference AnimatedValueHolder.animatedFloat.min/max so we have to keep
                 // our own state /sadface
                 // TODO: raise FR to open up AnimatedFloat.min/max
-                if (max.value > 0f && position.value / max.value >= swipeCompletePercentage) {
+                if (position.max > 0f && position.value / position.max >= swipeCompletePercentage) {
                     onSwipeComplete(SwipeDirection.RIGHT)
-                } else if (min.value < 0f && position.value / min.value >= swipeCompletePercentage) {
+                } else if (position.min < 0f && position.value / position.min >= swipeCompletePercentage) {
                     onSwipeComplete(SwipeDirection.LEFT)
                 }
-                position.animatedFloat.animateTo(0f)
+                position.animateTo(0f)
             },
             onDragValueChangeRequested = { dragValue ->
                 // Update the position using snapTo
-                position.animatedFloat.snapTo(dragValue)
+                position.snapTo(dragValue)
 
                 progress.value = when {
-                    dragValue < 0f && min.value < 0f -> dragValue / min.value
-                    dragValue > 0f && max.value > 0f -> dragValue / max.value
+                    dragValue < 0f && position.min < 0f -> dragValue / position.min
+                    dragValue > 0f && position.max > 0f -> dragValue / position.max
                     else -> 0f
                 }
 

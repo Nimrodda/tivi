@@ -61,7 +61,7 @@ allprojects {
         google()
         mavenCentral()
         jcenter()
-        maven { url 'https://ci.android.com/builds/submitted/6178998/androidx_snapshot/latest/ui/repository/' }
+        maven { url 'https://ci.android.com/builds/submitted/6192339/androidx_snapshot/latest/ui/repository/' }
         maven { url 'https://jitpack.io' }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
@@ -86,7 +86,6 @@ subprojects {
 
             // Enable experimental coroutines APIs, including Flow
             freeCompilerArgs += "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
-            freeCompilerArgs += "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
             freeCompilerArgs += "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
             freeCompilerArgs += "-Xuse-experimental=kotlin.Experimental"
 

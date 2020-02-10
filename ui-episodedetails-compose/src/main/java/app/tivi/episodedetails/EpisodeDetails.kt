@@ -28,11 +28,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.ui.animation.ColorPropKey
 import androidx.ui.animation.Transition
+import androidx.ui.core.DensityAmbient
 import androidx.ui.core.DrawModifier
 import androidx.ui.core.Modifier
 import androidx.ui.core.OnChildPositioned
 import androidx.ui.core.Text
-import androidx.ui.core.WithDensity
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.background
@@ -168,8 +168,8 @@ private fun EpisodeDetails(
             }
         }
 
-        val insets = InsetsAmbient.current
-        WithDensity {
+        with(DensityAmbient.current) {
+            val insets = InsetsAmbient.current
             WatchButton(
                 modifier = LayoutGravity.BottomRight +
                     LayoutPadding(horizontal = 16.dp, bottom = 16.dp + insets.bottom.toDp()),

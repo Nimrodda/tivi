@@ -17,6 +17,8 @@
 
 import app.tivi.buildsrc.Libs
 import app.tivi.buildsrc.Versions
+import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.LibraryPlugin
 
 buildscript {
     ext.buildConfig = [
